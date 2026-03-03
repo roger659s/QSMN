@@ -4,11 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LoveFlix - Nuestra Historia</title>
+    
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
     <style>
-        /* --- ESTILOS VISUALES (CSS) --- */
+        /* --- ESTILOS GENERALES --- */
         :root {
             --primary: #E50914; /* Rojo Netflix */
             --dark: #141414;    /* Negro Fondo */
@@ -21,10 +25,10 @@
             background-color: var(--dark);
             font-family: 'Roboto', sans-serif;
             color: var(--light);
-            overflow-x: hidden; /* Evita scroll horizontal */
+            overflow-x: hidden;
         }
 
-        /* Cabecera / Navegación */
+        /* --- CABECERA --- */
         header {
             position: fixed;
             top: 0;
@@ -35,6 +39,7 @@
             align-items: center;
             background: linear-gradient(to bottom, rgba(0,0,0,0.7) 10%, rgba(0,0,0,0));
             z-index: 1000;
+            box-sizing: border-box;
         }
 
         .logo {
@@ -45,18 +50,17 @@
             text-shadow: 2px 2px 4px #000;
         }
 
-        /* Sección Principal (Hero) */
+        /* --- PORTADA (HERO) --- */
         .hero {
             height: 85vh;
             width: 100%;
-            /* AQUÍ CAMBIARÁS LA FOTO DE FONDO PRINCIPAL */
+            /* FOTO DE FONDO PRINCIPAL - CAMBIA ESTA URL POR TU FOTO */
             background: url('https://images.unsplash.com/photo-1518199266791-5375a83190b7?q=80&w=2000&auto=format&fit=crop') center/cover no-repeat;
             display: flex;
             align-items: center;
             position: relative;
         }
 
-        /* Sombra para que se lea el texto sobre la foto */
         .hero::after {
             content: '';
             position: absolute;
@@ -75,6 +79,7 @@
             font-size: 5rem;
             margin-bottom: 10px;
             line-height: 1;
+            text-shadow: 2px 2px 5px rgba(0,0,0,0.7);
         }
 
         .hero-desc {
@@ -83,6 +88,7 @@
             text-shadow: 1px 1px 2px #000;
         }
 
+        /* --- BOTONES --- */
         .btn {
             padding: 10px 25px;
             font-size: 1.2rem;
@@ -92,26 +98,22 @@
             margin-right: 10px;
             font-weight: bold;
             transition: transform 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
         }
 
         .btn:hover { transform: scale(1.05); }
 
-        .btn-play {
-            background-color: var(--light);
-            color: #000;
-        }
+        .btn-play { background-color: var(--light); color: #000; }
+        .btn-info { background-color: rgba(109, 109, 110, 0.7); color: var(--light); }
 
-        .btn-info {
-            background-color: rgba(109, 109, 110, 0.7);
-            color: var(--light);
-        }
-
-        /* Carruseles de Fotos */
+        /* --- CARRUSEL DE FOTOS --- */
         .category {
             padding: 20px 50px;
             position: relative;
             z-index: 20;
-            margin-top: -100px; /* Para que empiece sobre el degradado */
+            margin-top: -100px;
         }
 
         .category h2 {
@@ -125,9 +127,9 @@
             overflow-x: auto;
             gap: 10px;
             padding-bottom: 20px;
-            scrollbar-width: none; /* Ocultar barra scroll Firefox */
+            scrollbar-width: none;
         }
-        .row::-webkit-scrollbar { display: none; } /* Ocultar barra scroll Chrome */
+        .row::-webkit-scrollbar { display: none; }
 
         .card {
             min-width: 250px;
@@ -151,13 +153,57 @@
             box-shadow: 0 0 10px rgba(0,0,0,0.8);
         }
 
-        /* El Modal (La ventana emergente de la pregunta) */
-        #proposal-modal {
-            display: none; /* Oculto por defecto */
+        /* --- MODAL 1: MÁS INFORMACIÓN --- */
+        .modal-overlay {
+            display: none;
             position: fixed;
             top: 0; left: 0;
             width: 100%; height: 100%;
-            background: rgba(0,0,0,0.9);
+            background: rgba(0,0,0,0.85);
+            z-index: 4000;
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 0.5s;
+        }
+
+        .info-box {
+            background-color: #181818;
+            width: 90%;
+            max-width: 500px;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.7);
+            position: relative;
+            color: white;
+            border: 1px solid #333;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 15px; right: 20px;
+            font-size: 25px;
+            cursor: pointer;
+            color: #fff;
+        }
+
+        .match-score { color: #46d369; font-weight: bold; margin-bottom: 10px; font-size: 1.1rem; }
+        
+        .meta-data { 
+            display: flex; gap: 15px; align-items: center; color: #a3a3a3; font-size: 0.9rem; margin-bottom: 20px; 
+        }
+        
+        .age-rating { border: 1px solid #a3a3a3; padding: 0 5px; font-size: 0.8rem; }
+        .synopsis { font-size: 1rem; line-height: 1.5; margin-bottom: 20px; color: #fff; }
+        .cast-info p { margin: 5px 0; font-size: 0.9rem; color: #777; }
+        .cast-info strong { color: #dcdcdc; }
+
+        /* --- MODAL 2: LA PREGUNTA FINAL --- */
+        #proposal-modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.95);
             z-index: 5000;
             justify-content: center;
             align-items: center;
@@ -165,26 +211,25 @@
             text-align: center;
         }
 
-        .modal-content {
-            background: #181818;
-            padding: 40px;
-            border-radius: 10px;
+        .proposal-content {
+            background: transparent;
+            padding: 20px;
             max-width: 90%;
-            border: 1px solid #333;
         }
 
         .modal-title {
             font-family: 'Bebas Neue';
-            font-size: 3rem;
+            font-size: 4rem;
             color: var(--primary);
+            margin: 0;
         }
 
         .modal-buttons {
-            margin-top: 30px;
+            margin-top: 40px;
             display: flex;
             justify-content: center;
             gap: 20px;
-            position: relative; /* Necesario para el truco del botón */
+            position: relative;
         }
 
         .btn-yes {
@@ -200,8 +245,19 @@
             color: #888;
             padding: 15px 40px;
             font-size: 1.5rem;
+            position: relative; /* Importante para moverlo */
+            transition: all 0.2s ease;
         }
 
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* Ajustes para móvil */
+        @media (max-width: 768px) {
+            .hero-title { font-size: 3rem; }
+            .hero-content { padding-left: 20px; }
+            .modal-title { font-size: 2.5rem; }
+            .category { padding: 20px 20px; }
+        }
     </style>
 </head>
 <body>
@@ -220,8 +276,8 @@
                 ¿Estará lista para la siguiente temporada?
             </p>
             <div>
-                <button class="btn btn-play" onclick="lanzarPregunta()"><i class="fas fa-play"></i> Ver ahora</button>
-                <button class="btn btn-info"><i class="fas fa-info-circle"></i> Más info</button>
+                <button class="btn btn-play" onclick="abrirPregunta()"><i class="fas fa-play"></i> Ver ahora</button>
+                <button class="btn btn-info" onclick="abrirInfo()"><i class="fas fa-info-circle"></i> Más información</button>
             </div>
         </div>
     </div>
@@ -244,40 +300,133 @@
             <div class="card"><img src="https://source.unsplash.com/random/300x200?pizza" alt="Foto"></div>
             <div class="card"><img src="https://source.unsplash.com/random/300x200?burger" alt="Foto"></div>
             <div class="card"><img src="https://source.unsplash.com/random/300x200?sushi" alt="Foto"></div>
+            <div class="card"><img src="https://source.unsplash.com/random/300x200?dessert" alt="Foto"></div>
+        </div>
+    </div>
+
+    <div id="info-modal" class="modal-overlay">
+        <div class="info-box">
+            <span class="close-btn" onclick="cerrarInfo()">&times;</span>
+            
+            <h2 class="match-score">98% de coincidencia</h2>
+            <div class="meta-data">
+                <span>2024</span>
+                <span class="age-rating">18+</span>
+                <span>1h 30m</span>
+                <span class="quality">HD</span>
+            </div>
+
+            <p class="synopsis">
+                <strong>Sinopsis:</strong> Un chico intenta sorprender a la chica más increíble del mundo con una web hecha por él mismo. 
+                Hay rumores de que esta temporada acaba con una pregunta muy importante. 
+                ¿Dirá que sí? Los críticos dicen que es "La mejor historia de amor jamás contada".
+            </p>
+
+            <div class="cast-info">
+                <p><strong>Protagonistas:</strong> Tú y [Nombre de Ella]</p>
+                <p><strong>Género:</strong> Romance, Comedia, Aventuras</p>
+                <p><strong>Este título es:</strong> Cursi, Emocionante, Inolvidable</p>
+            </div>
+
+            <button class="btn btn-play" style="width: 100%; margin-top: 20px;" onclick="cerrarInfo(); abrirPregunta()">
+                <i class="fas fa-play"></i> Ver el Gran Final
+            </button>
         </div>
     </div>
 
     <div id="proposal-modal">
-        <div class="modal-content">
+        <div class="proposal-content">
             <h1 class="modal-title">¿Quieres renovar para la Temporada 2?</h1>
-            <p style="font-size: 1.2rem; margin-bottom: 20px;">
+            <p style="font-size: 1.2rem; margin-bottom: 20px; color: #ccc;">
                 La suscripción incluye abrazos ilimitados, cenas ricas y aguantar mis chistes malos.
-                <br><b>¿Quieres ser mi novia?</b>
+                <br><br><b style="color: white; font-size: 1.5rem;">¿Quieres ser mi novia?</b>
             </p>
             <div class="modal-buttons">
                 <button class="btn btn-yes" onclick="aceptar()">¡CLARO QUE SÍ!</button>
-                <button class="btn btn-no" id="btnNo" onmouseover="moverBoton()">No :(</button>
+                <button class="btn btn-no" id="btnNo">No :(</button>
             </div>
         </div>
     </div>
 
     <script>
-        // --- AQUÍ PONDREMOS LA MAGIA EN EL SIGUIENTE PASO ---
-        function lanzarPregunta() {
-            document.getElementById('proposal-modal').style.display = 'flex';
-        }
-        
-        function aceptar() {
-            alert("¡Sabía que dirías que sí! Te quiero ❤️ (Aquí pondremos confeti luego)");
+        // --- VARIABLES ---
+        const infoModal = document.getElementById('info-modal');
+        const proposalModal = document.getElementById('proposal-modal');
+        const btnNo = document.getElementById('btnNo');
+
+        // --- FUNCIONES MÁS INFO ---
+        function abrirInfo() {
+            infoModal.style.display = 'flex';
         }
 
+        function cerrarInfo() {
+            infoModal.style.display = 'none';
+        }
+
+        // --- FUNCIONES PREGUNTA ---
+        function abrirPregunta() {
+            proposalModal.style.display = 'flex';
+        }
+
+        // --- LOGICA DEL BOTÓN "NO" ESCURRIDIZO ---
         function moverBoton() {
-            // Esto lo haremos más pro en el siguiente paso
-            const x = Math.random() * (window.innerWidth - 100);
-            const y = Math.random() * (window.innerHeight - 100);
-            // document.getElementById('btnNo').style.position = 'absolute';
-            // document.getElementById('btnNo').style.left = x + 'px';
-            // document.getElementById('btnNo').style.top = y + 'px';
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+            
+            const newX = Math.random() * (width - btnNo.offsetWidth - 100) + 50; 
+            const newY = Math.random() * (height - btnNo.offsetHeight - 100) + 50;
+
+            btnNo.style.position = 'fixed';
+            btnNo.style.left = newX + 'px';
+            btnNo.style.top = newY + 'px';
+        }
+
+        // Se mueve al pasar el ratón (PC)
+        btnNo.addEventListener('mouseover', moverBoton);
+        
+        // Se mueve al tocar (Móvil)
+        btnNo.addEventListener('touchstart', (e) => {
+            e.preventDefault(); // Evita que se haga click
+            moverBoton();
+        });
+
+        // --- LÓGICA DEL SÍ (CONFETI) ---
+        function aceptar() {
+            // Ocultar botones y cambiar texto
+            document.querySelector('.modal-buttons').style.display = 'none';
+            document.querySelector('.modal-title').innerText = "¡SABÍA QUE DIRÍAS QUE SÍ! ❤️";
+            document.querySelector('#proposal-modal p').innerHTML = "Prepárate para la mejor temporada de tu vida.<br>Te quiero muchísimo.";
+            
+            // Lanzar confeti
+            var duration = 5 * 1000;
+            var animationEnd = Date.now() + duration;
+            var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 6000 };
+
+            function randomInRange(min, max) {
+                return Math.random() * (max - min) + min;
+            }
+
+            var interval = setInterval(function() {
+                var timeLeft = animationEnd - Date.now();
+
+                if (timeLeft <= 0) {
+                    return clearInterval(interval);
+                }
+
+                var particleCount = 50 * (timeLeft / duration);
+                confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } }));
+                confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } }));
+            }, 250);
+        }
+
+        // Cerrar modales si se hace click fuera
+        window.onclick = function(event) {
+            if (event.target == infoModal) {
+                infoModal.style.display = "none";
+            }
+            if (event.target == proposalModal) {
+                proposalModal.style.display = "none";
+            }
         }
     </script>
 </body>
