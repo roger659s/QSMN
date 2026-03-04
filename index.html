@@ -56,10 +56,11 @@
             height: 85vh;
             width: 100%;
             /* FOTO DE FONDO PRINCIPAL - CAMBIA ESTA URL POR TU FOTO */
-            background: url('FotoPrincipal.jpeg') center/cover no-repeat;
+            /*background: url('FotoPrincipal.jpeg') center/cover no-repeat;*/
             display: flex;
             align-items: center;
             position: relative;
+            overflow: hidden;
         }
 
         .hero::after {
@@ -271,7 +272,13 @@
     </header>
 
     <div class="hero">
-        <div class="hero-content">
+        <video autoplay muted loop playsinline style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0;">
+            <source src="VideoWeb.mp4" type="video/mp4">
+        </video>
+        
+        <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1;"></div>
+
+        <div class="hero-content" style="z-index: 2; position: relative;">
             <h1 class="hero-title">NUESTRA HISTORIA COOKIE</h1>
             <p class="hero-desc">
                 Temporada 1. Una historia llena de risas, parkings y momentos inolvidables. 
@@ -434,6 +441,7 @@
     </script>
 </body>
 </html>
+
 
 
 
