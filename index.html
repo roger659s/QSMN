@@ -7,9 +7,7 @@
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>❤️</text></svg>">
     
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
-    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
     <style>
@@ -26,7 +24,27 @@
             background-color: var(--dark);
             font-family: 'Roboto', sans-serif;
             color: var(--light);
-            overflow-x: hidden;
+            overflow-x: hidden; /* Evita scroll lateral */
+        }
+
+        /* --- PANTALLA DE CARGA (INTRO) --- */
+        #intro-loader {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background-color: #000;
+            z-index: 9999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 1s ease;
+        }
+
+        /* Animación del latido */
+        @keyframes latido {
+            0% { transform: scale(1); opacity: 1; text-shadow: 0 0 0 transparent; }
+            50% { transform: scale(1.1); opacity: 0.8; text-shadow: 0 0 20px var(--primary); }
+            100% { transform: scale(1); opacity: 1; text-shadow: 0 0 0 transparent; }
         }
 
         /* --- CABECERA --- */
@@ -38,9 +56,10 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: linear-gradient(to bottom, rgba(0,0,0,0.7) 10%, rgba(0,0,0,0));
+            background: linear-gradient(to bottom, rgba(0,0,0,0.8) 10%, rgba(0,0,0,0));
             z-index: 1000;
             box-sizing: border-box;
+            transition: background 0.5s;
         }
 
         .logo {
@@ -51,29 +70,40 @@
             text-shadow: 2px 2px 4px #000;
         }
 
-        /* --- PORTADA (HERO) --- */
+        /* --- PORTADA (HERO) UNIFICADA --- */
         .hero {
             height: 85vh;
             width: 100%;
-            /* FOTO DE FONDO PRINCIPAL - CAMBIA ESTA URL POR TU FOTO */
-            /*background: url('FotoPrincipal.jpeg') center/cover no-repeat;*/
+            position: relative;
             display: flex;
             align-items: center;
-            position: relative;
             overflow: hidden;
         }
 
-        .hero::after {
-            content: '';
+        /* Vídeo de fondo */
+        .hero video {
             position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(to top, #141414 5%, transparent 60%);
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            object-fit: cover;
+            z-index: 0;
         }
 
+        /* Capa oscura sobre el vídeo */
+        .hero-overlay {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.4); /* Un poco más transparente para ver mejor el vídeo */
+            z-index: 1;
+        }
+
+        /* Contenido del texto */
         .hero-content {
             padding-left: 50px;
-            z-index: 10;
+            z-index: 2; /* Encima del vídeo */
             max-width: 600px;
+            position: relative;
         }
 
         .hero-title {
@@ -81,13 +111,24 @@
             font-size: 5rem;
             margin-bottom: 10px;
             line-height: 1;
-            text-shadow: 2px 2px 5px rgba(0,0,0,0.7);
+            text-shadow: 2px 2px 5px rgba(0,0,0,0.8);
         }
 
         .hero-desc {
             font-size: 1.2rem;
             margin-bottom: 20px;
-            text-shadow: 1px 1px 2px #000;
+            text-shadow: 1px 1px 3px #000;
+            font-weight: 400;
+        }
+
+        /* Degradado inferior (Fade Out) */
+        .hero-fade {
+            position: absolute;
+            bottom: 0; left: 0;
+            width: 100%; height: 150px;
+            background: linear-gradient(to bottom, transparent, #141414);
+            z-index: 3;
+            pointer-events: none; /* Deja hacer click a través de él */
         }
 
         /* --- BOTONES --- */
@@ -99,7 +140,7 @@
             cursor: pointer;
             margin-right: 10px;
             font-weight: bold;
-            transition: transform 0.2s;
+            transition: all 0.2s;
             display: inline-flex;
             align-items: center;
             gap: 10px;
@@ -109,27 +150,24 @@
 
         .btn-play { background-color: var(--light); color: #000; }
         .btn-info { background-color: rgba(109, 109, 110, 0.7); color: var(--light); }
+        .btn-info:hover { background-color: rgba(109, 109, 110, 0.9); }
 
         /* --- CARRUSEL DE FOTOS --- */
         .category {
             padding: 20px 50px;
             position: relative;
             z-index: 20;
-            margin-top: -100px;
-        }
-
-        .category h2 {
-            font-size: 1.5rem;
-            margin-bottom: 10px;
-            font-weight: 500;
+            margin-top: -80px; /* Subimos un poco para que se monte sobre el degradado */
         }
 
         .row {
             display: flex;
             overflow-x: auto;
             gap: 10px;
-            padding-bottom: 20px;
+            padding: 10px 0 20px 0;
             scrollbar-width: none;
+            /* MEJORA PRO: SCROLL SNAP (Efecto imán en móvil) */
+            scroll-snap-type: x mandatory; 
         }
         .row::-webkit-scrollbar { display: none; }
 
@@ -138,40 +176,42 @@
             height: 140px;
             border-radius: 4px;
             overflow: hidden;
-            transition: transform 0.3s;
+            transition: all 0.3s ease;
             cursor: pointer;
             position: relative;
+            /* MEJORA PRO: SNAP ALINEACIÓN */
+            scroll-snap-align: start; 
         }
 
         .card img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
+            width: 100%; height: 100%; object-fit: cover;
         }
 
+        /* MEJORA PRO: EFECTO HOVER CON GLOW */
         .card:hover {
-            transform: scale(1.1);
+            transform: scale(1.15); /* Crece un poco más */
             z-index: 99;
-            box-shadow: 0 0 10px rgba(0,0,0,0.8);
+            box-shadow: 0 0 15px rgba(229, 9, 20, 0.6); /* Resplandor rojo */
+            border: 2px solid white; /* Borde blanco elegante */
         }
 
-        /* --- MODAL 1: MÁS INFORMACIÓN --- */
+        /* --- MODALES --- */
         .modal-overlay {
             display: none;
             position: fixed;
             top: 0; left: 0;
             width: 100%; height: 100%;
-            background: rgba(0,0,0,0.85);
+            background: rgba(0,0,0,0.9);
             z-index: 4000;
             justify-content: center;
             align-items: center;
             animation: fadeIn 0.5s;
+            backdrop-filter: blur(5px); /* Fondo borroso detrás del modal */
         }
 
         .info-box {
             background-color: #181818;
-            width: 90%;
-            max-width: 500px;
+            width: 90%; max-width: 500px;
             padding: 30px;
             border-radius: 8px;
             box-shadow: 0 0 20px rgba(0,0,0,0.7);
@@ -183,29 +223,22 @@
         .close-btn {
             position: absolute;
             top: 15px; right: 20px;
-            font-size: 25px;
-            cursor: pointer;
-            color: #fff;
+            font-size: 25px; cursor: pointer; color: #fff;
         }
 
+        /* Textos del modal */
         .match-score { color: #46d369; font-weight: bold; margin-bottom: 10px; font-size: 1.1rem; }
-        
-        .meta-data { 
-            display: flex; gap: 15px; align-items: center; color: #a3a3a3; font-size: 0.9rem; margin-bottom: 20px; 
-        }
-        
+        .meta-data { display: flex; gap: 15px; align-items: center; color: #a3a3a3; font-size: 0.9rem; margin-bottom: 20px; }
         .age-rating { border: 1px solid #a3a3a3; padding: 0 5px; font-size: 0.8rem; }
-        .synopsis { font-size: 1rem; line-height: 1.5; margin-bottom: 20px; color: #fff; }
-        .cast-info p { margin: 5px 0; font-size: 0.9rem; color: #777; }
-        .cast-info strong { color: #dcdcdc; }
-
-        /* --- MODAL 2: LA PREGUNTA FINAL --- */
+        .synopsis { font-size: 1rem; line-height: 1.5; margin-bottom: 20px; color: #ddd; }
+        
+        /* Modal Pregunta */
         #proposal-modal {
             display: none;
             position: fixed;
             top: 0; left: 0;
             width: 100%; height: 100%;
-            background: rgba(0,0,0,0.95);
+            background: rgba(0,0,0,0.92);
             z-index: 5000;
             justify-content: center;
             align-items: center;
@@ -213,61 +246,36 @@
             text-align: center;
         }
 
-        .proposal-content {
-            background: transparent;
-            padding: 20px;
-            max-width: 90%;
-        }
-
         .modal-title {
             font-family: 'Bebas Neue';
             font-size: 4rem;
             color: var(--primary);
             margin: 0;
+            text-shadow: 0 0 20px rgba(229, 9, 20, 0.5);
         }
 
-        .modal-buttons {
-            margin-top: 40px;
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            position: relative;
-        }
+        .btn-yes { background-color: var(--primary); color: white; padding: 15px 40px; font-size: 1.5rem; border-radius: 5px; box-shadow: 0 0 15px rgba(229, 9, 20, 0.4); }
+        .btn-yes:hover { transform: scale(1.1); box-shadow: 0 0 25px rgba(229, 9, 20, 0.8); }
 
-        .btn-yes {
-            background-color: var(--primary);
-            color: white;
-            padding: 15px 40px;
-            font-size: 1.5rem;
-        }
-
-        .btn-no {
-            background-color: transparent;
-            border: 2px solid #555;
-            color: #888;
-            padding: 15px 40px;
-            font-size: 1.5rem;
-            position: relative; /* Importante para moverlo */
-            transition: all 0.2s ease;
-        }
+        .btn-no { background-color: transparent; border: 2px solid #555; color: #888; padding: 15px 40px; font-size: 1.5rem; border-radius: 5px; position: relative; transition: all 0.2s ease; }
 
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* Ajustes para móvil */
+        /* MÓVIL */
         @media (max-width: 768px) {
             .hero-title { font-size: 3rem; }
-            .hero-content { padding-left: 20px; }
+            .hero-content { padding-left: 20px; padding-right: 20px; text-align: center; }
+            .hero-content div { display: flex; justify-content: center; } /* Centrar botones */
             .modal-title { font-size: 2.5rem; }
             .category { padding: 20px 20px; }
-        }
-        @keyframes latido {
-            0% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.1); opacity: 0.8; }
-            100% { transform: scale(1); opacity: 1; }
         }
     </style>
 </head>
 <body>
+
+    <div id="intro-loader">
+        <h1 style="font-family: 'Bebas Neue'; color: #E50914; font-size: 5rem; letter-spacing: 4px; animation: latido 1.5s infinite;">ARFLIX</h1>
+    </div>
 
     <header>
         <div class="logo">ARFLIX</div>
@@ -277,13 +285,13 @@
     </header>
 
     <div class="hero">
-        <video autoplay muted loop playsinline style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0;">
+        <video autoplay muted loop playsinline poster="FotoPrincipal.jpeg">
             <source src="VideoWeb.mp4" type="video/mp4">
         </video>
         
-        <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1;"></div>
+        <div class="hero-overlay"></div>
 
-        <div class="hero-content" style="position: relative; z-index: 2;">
+        <div class="hero-content">
             <h1 class="hero-title">NUESTRA HISTORIA COOKIE</h1>
             <p class="hero-desc">
                 Temporada 1. Una historia llena de risas, parkings y momentos inolvidables. 
@@ -296,10 +304,10 @@
             </div>
         </div>
 
-        <div style="position: absolute; bottom: 0; left: 0; width: 100%; height: 150px; background: linear-gradient(to bottom, transparent, #141414); z-index: 3;"></div>
+        <div class="hero-fade"></div>
     </div>
 
-   <div class="category">
+    <div class="category">
         <h2 style="font-family: 'Bebas Neue', cursive; font-size: 2.5rem; letter-spacing: 1px; text-shadow: 2px 2px 4px #000;">🔥 TENDENCIAS EN TU CORAZÓN</h2>
         <div class="row">
             <div class="card"><img src="Flores.jpeg" alt="Flores"></div>
@@ -366,101 +374,70 @@
     </div>
 
     <script>
-        // Desaparecer la intro a los 2.5 segundos
+        // 1. INTRO DE CARGA
         window.addEventListener('load', function() {
             setTimeout(function() {
                 const loader = document.getElementById('intro-loader');
                 loader.style.opacity = '0'; // Se desvanece
                 setTimeout(function() {
-                    loader.style.display = 'none'; // Se borra
+                    loader.style.display = 'none'; // Se elimina
                 }, 1000);
-            }, 2500); // Tiempo que dura el logo en pantalla
+            }, 2500); // 2.5 segundos de intro
         });
-        // --- VARIABLES ---
+
+        // 2. VARIABLES
         const infoModal = document.getElementById('info-modal');
         const proposalModal = document.getElementById('proposal-modal');
         const btnNo = document.getElementById('btnNo');
 
-        // --- FUNCIONES MÁS INFO ---
-        function abrirInfo() {
-            infoModal.style.display = 'flex';
-        }
+        // 3. FUNCIONES
+        function abrirInfo() { infoModal.style.display = 'flex'; }
+        function cerrarInfo() { infoModal.style.display = 'none'; }
+        function abrirPregunta() { proposalModal.style.display = 'flex'; }
 
-        function cerrarInfo() {
-            infoModal.style.display = 'none';
-        }
-
-        // --- FUNCIONES PREGUNTA ---
-        function abrirPregunta() {
-            proposalModal.style.display = 'flex';
-        }
-
-        // --- LOGICA DEL BOTÓN "NO" ESCURRIDIZO ---
+        // 4. BOTÓN "NO" ESCURRIDIZO
         function moverBoton() {
             const width = window.innerWidth;
             const height = window.innerHeight;
-            
             const newX = Math.random() * (width - btnNo.offsetWidth - 100) + 50; 
             const newY = Math.random() * (height - btnNo.offsetHeight - 100) + 50;
-
+            
             btnNo.style.position = 'fixed';
             btnNo.style.left = newX + 'px';
             btnNo.style.top = newY + 'px';
         }
+        btnNo.addEventListener('mouseover', moverBoton); // PC
+        btnNo.addEventListener('touchstart', (e) => { e.preventDefault(); moverBoton(); }); // Móvil
 
-        // Se mueve al pasar el ratón (PC)
-        btnNo.addEventListener('mouseover', moverBoton);
-        
-        // Se mueve al tocar (Móvil)
-        btnNo.addEventListener('touchstart', (e) => {
-            e.preventDefault(); // Evita que se haga click
-            moverBoton();
-        });
-
-        // --- LÓGICA DEL SÍ (CONFETI) ---
+        // 5. RESPUESTA "SÍ"
         function aceptar() {
-            // Ocultar botones y cambiar texto
             document.querySelector('.modal-buttons').style.display = 'none';
             document.querySelector('.modal-title').innerText = "¡SABÍA QUE DIRÍAS QUE SÍ! ❤️";
             document.querySelector('#proposal-modal p').innerHTML = "Prepárate para la mejor temporada de tu vida.<br>Te quiero muchísimo.";
             
-            // Lanzar confeti
+            // Confeti
             var duration = 5 * 1000;
             var animationEnd = Date.now() + duration;
             var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 6000 };
-
-            function randomInRange(min, max) {
-                return Math.random() * (max - min) + min;
-            }
-
+            function randomInRange(min, max) { return Math.random() * (max - min) + min; }
+            
             var interval = setInterval(function() {
                 var timeLeft = animationEnd - Date.now();
-
-                if (timeLeft <= 0) {
-                    return clearInterval(interval);
-                }
-
+                if (timeLeft <= 0) return clearInterval(interval);
                 var particleCount = 50 * (timeLeft / duration);
                 confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } }));
                 confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } }));
             }, 250);
         }
 
-        // Cerrar modales si se hace click fuera
+        // CERRAR AL CLICAR FUERA
         window.onclick = function(event) {
-            if (event.target == infoModal) {
-                infoModal.style.display = "none";
-            }
-            if (event.target == proposalModal) {
-                proposalModal.style.display = "none";
-            }
+            if (event.target == infoModal) infoModal.style.display = "none";
+            if (event.target == proposalModal) proposalModal.style.display = "none";
         }
     </script>
 </body>
 </html>
-
-
-
 
 
 
